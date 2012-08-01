@@ -11,9 +11,10 @@ X, Linux 等。網頁：http://calibre-ebook.com/
 ## 安裝
 
 
-把整個目錄 zip 壓縮起來，或是從
-http://github.com/elleryq/calibre-haodoosearch/zipball/master 下載，
-然後從 Calibre 的偏好設定中安裝。
+從 http://github.com/elleryq/calibre-haodoosearch/zipball/master 下載以後，
+請先解開到資料夾，然後選取資料夾裡的檔案之後，再壓縮為 zip。就是 zip 檔案裡
+不能有資料夾 (github 提供下載的 zip 會有資料夾)。然後從 Calibre 的偏好設定
+中安裝。
 
 ## 使用說明
 
