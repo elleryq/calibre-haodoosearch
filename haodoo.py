@@ -68,13 +68,6 @@ class HaodooStore(StorePlugin):
 
                 yield s
 
-    def __convert_to_dl_url( self, book_id ):
-        result = "http://www.haodoo.net/?" + urlencode( {
-            "M": "d",
-            "P": book_id+".epub" } )
-        #print( "__convert_to_dl_url()=%s" % result )
-        return result
-
     def get_details(self, search_result, timeout):
         print("get_details")
         try:
@@ -90,24 +83,51 @@ class HaodooStore(StorePlugin):
 
             for save_item in doc.xpath('//input[contains(@type, "button")]'):
                 onclick = save_item.get('onclick')
-                if not "DownloadEpub" in onclick:
-                    continue
-
-                # retrieve only the parameter in javascript.
-                quote = "'"
-                try:
-                    start = onclick.index( quote )
-                except ValueError: 
-                    quote = '"'
-                start = onclick.index( quote )
-                end = onclick.rindex( quote )
-                book_id = onclick[ start+1:end ]
-
-                # convert to download link
-                dl_link = self.__convert_to_dl_url( book_id )
-
-                # put in search result.
-                search_result.downloads["epub"] = dl_link
-                search_result.formats = ', '.join(search_result.downloads.keys())
+                if "DownloadEpub" in onclick:
+                    self.__handle( search_result, onclick, "epub" )
+                elif "DownloadUpdb" in onclick:
+                    self.__handle( search_result, onclick, "updb" )
+                elif "DownloadPdb" in onclick:
+                    self.__handle( search_result, onclick, "pdb" )
 
         return True
+
+    def __find_book_id( self, onclick ):
+        # find which kind of quote, ' or "
+        quote = "'"
+        try:
+            start = onclick.index( quote )
+        except ValueError: 
+            quote = '"'
+
+        book_id = ''
+        try:
+            start = onclick.index( quote )
+            end = onclick.rindex( quote )
+            book_id = onclick[ start+1:end ]
+        except:
+            pass
+
+        return book_id
+
+    def __convert_to_dl_url( self, book_id, ext ):
+        result = "http://www.haodoo.net/?" + urlencode( {
+            "M": "d",
+            "P": book_id+"." + ext } )
+        #print( "__convert_to_dl_url()=%s" % result )
+        return result
+
+    def __handle( self, search_result, onclick, book_type ):
+        # retrieve only the parameter in javascript.
+        book_id = self.__find_book_id( onclick )
+        if not book_id:
+            print( "Cannot extract book_id" )
+            return
+
+        # convert to download link
+        dl_link = self.__convert_to_dl_url( book_id, book_type )
+
+        # put in search result.
+        search_result.downloads[book_type] = dl_link
+        search_result.formats = ', '.join(search_result.downloads.keys())
+
