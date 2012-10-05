@@ -13,7 +13,7 @@ class HaodooStorePlugin(StoreBase):
     description = _('Search in Haodoo (http://www.haodoo.net)')
     supported_platforms     = ['windows', 'linux']
     author                  = 'Yan-ren Tsai <elleryq@gmail.com>'
-    version                 = (0, 1, 0)
+    version                 = (0, 2, 0)
     minimum_calibre_version = (0, 8, 0)
 
     actual_plugin = 'calibre_plugins.store_haodoosearchplugin.haodoo:HaodooStore'
