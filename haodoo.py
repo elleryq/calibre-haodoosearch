@@ -18,6 +18,7 @@ from calibre.gui2.store.web_store_dialog import WebStoreDialog
 from contextlib import closing
 from urllib import urlencode
 from lxml import html
+import pickle
 
 try:
     import json
@@ -46,12 +47,6 @@ class HaodooStore(StorePlugin):
                 {
                     "q": q
                 } )
-        #url = "https://api.scraperwiki.com/api/1.0/datastore/sqlite?" + urlencode(
-        #        {
-        #            "format": "jsondict",
-        #            "name": "haodooscraper",
-        #            "query": "select * from `bookpages` where title like '%{0}%' or volumes like '%{0}%' limit 10".format( q ),
-        #        } )
         print( url )
 
         br = browser()
@@ -59,24 +54,18 @@ class HaodooStore(StorePlugin):
             json_doc = f.read()
             if len(json_doc)>0:
                 result = json.loads( json_doc )
-                for book in result:
-                    if not book.has_key('volumes') or not book['volumes']:
-                        print( "No volumes, skip." )
-                        continue
-                    volumes = json.loads( book['volumes'] )
-                    print( type( volumes ) )
-                    for volume in volumes:
-                        s = SearchResult()
-                        s.title = volume['title']
-                        s.detail_item = book['url']
-                        s.price = '$0.00'
-                        s.drm = SearchResult.DRM_UNLOCKED
+                for volume in result:
+                    s = SearchResult()
+                    s.title = volume['title']
+                    s.detail_item = volume['url']
+                    s.price = '$0.00'
+                    s.drm = SearchResult.DRM_UNLOCKED
 
-                        if volume.has_key('type') and len(volume["type"]):
-                            exts = json.loads( volume["type"] )
-                            for t in exts:
-                                ext, dl_link = t
-                                s.downloads[ext] = dl_link
-                            s.formats = ', '.join(s.downloads.keys())
-                        yield s
+                    if volume.has_key('type') and len(volume["type"]):
+                        for t in volume["type"]:
+                            s.downloads[ t['type'] ] = t['link']
+                        s.formats = ', '.join(s.downloads.keys())
+                    yield s
+            else:
+                print( "scrape nothing." )
 
